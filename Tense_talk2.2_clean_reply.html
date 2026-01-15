@@ -1,0 +1,822 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>Kru Pai Classroom — Airport Listening Talk (WORKING)</title>
+  <style>
+    :root{
+      --cream:#f7fbff; --latte:#dbeafe; --coffee:#0f172a; --mocha:#1e293b;
+      --mint:#0ea5e9; --mint2:#93c5fd; --gold:#fbbf24; --pink:#fb7185;
+      --ink:#0b1220; --muted:#334155; --card:#ffffffcc;
+      --shadow: 0 18px 55px rgba(2,6,23,.22);
+      --shadow2: 0 10px 28px rgba(2,6,23,.16);
+      --r: 22px;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0; min-height:100vh;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Noto Sans Thai", Arial;
+      color: var(--ink);
+      background:
+        radial-gradient(900px 600px at 20% 10%, rgba(147,197,253,.35), transparent 60%),
+        radial-gradient(800px 600px at 85% 20%, rgba(251,191,36,.22), transparent 62%),
+        linear-gradient(180deg, var(--cream), #fff 45%, var(--latte));
+      padding:18px 14px 34px;
+    }
+    .app{
+      width:min(1100px, 100%); margin:0 auto;
+      border-radius: 28px;
+      background: rgba(255,255,255,.58);
+      border:1px solid rgba(15,23,42,.10);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+      backdrop-filter: blur(8px);
+    }
+    header{
+      padding:16px 18px;
+      border-bottom:1px solid rgba(15,23,42,.10);
+      background: linear-gradient(90deg, rgba(255,255,255,.70), rgba(219,234,254,.70));
+      display:flex; align-items:center; justify-content:space-between;
+      gap:10px; flex-wrap:wrap;
+    }
+    .brand{display:flex; flex-direction:column; gap:2px}
+    .pill{
+      display:inline-flex; gap:8px; align-items:center;
+      padding:5px 10px; border-radius:999px;
+      border:1px solid rgba(14,165,233,.22);
+      background: rgba(147,197,253,.22);
+      color: var(--coffee);
+      font-weight:1000; font-size:12px;
+      width:fit-content;
+    }
+    .title{font-weight:1000; font-size:18px; color:var(--coffee)}
+    .sub{color: var(--muted); font-weight:800; font-size:12px}
+
+    .hud{display:flex; gap:10px; align-items:center; flex-wrap:wrap; justify-content:flex-end;}
+    .chip{
+      display:flex; gap:8px; align-items:center;
+      padding:8px 12px; border-radius:999px;
+      border:1px solid rgba(15,23,42,.10);
+      background: rgba(255,255,255,.68);
+      box-shadow: var(--shadow2);
+      font-weight:1000; font-size:13px;
+      color: var(--mocha);
+    }
+    .chip strong{color: var(--mint)}
+    .btn{
+      border:0; cursor:pointer;
+      border-radius: 14px;
+      padding:12px 14px;
+      font-weight:1000;
+      color: #fff;
+      background: linear-gradient(180deg, rgba(14,165,233,.95), rgba(2,132,199,.95));
+      box-shadow: var(--shadow2);
+      transition: transform .12s ease;
+      -webkit-tap-highlight-color: transparent;
+      user-select:none;
+    }
+    .btn:active{transform: translateY(1px) scale(.99)}
+    .btn.secondary{
+      background: rgba(255,255,255,.70);
+      border:1px solid rgba(15,23,42,.12);
+      color: var(--mocha);
+      font-weight:1000;
+    }
+    .btn.gold{
+      background: linear-gradient(180deg, rgba(251,191,36,.95), rgba(245,158,11,.95));
+      color: #1f2937;
+    }
+    .btn.danger{
+      background: linear-gradient(180deg, rgba(251,113,133,.95), rgba(225,29,72,.95));
+      color: #fff;
+    }
+
+    main{padding:18px}
+    .screen{display:none}
+    .screen.active{display:block}
+
+    .grid{
+      display:grid; grid-template-columns: 1fr 1fr;
+      gap:14px; align-items:start;
+    }
+    @media (max-width: 980px){ .grid{grid-template-columns:1fr} }
+
+    .card{
+      border-radius: var(--r);
+      border:1px solid rgba(15,23,42,.10);
+      background: var(--card);
+      box-shadow: var(--shadow2);
+      padding:16px; position:relative; overflow:hidden;
+    }
+    .card:before{
+      content:""; position:absolute; width:420px; height:420px;
+      right:-240px; top:-240px;
+      background: radial-gradient(circle at 35% 35%, rgba(251,191,36,.25), transparent 60%),
+                  radial-gradient(circle at 60% 60%, rgba(147,197,253,.35), transparent 62%);
+      opacity:.75; transform: rotate(10deg);
+      pointer-events:none;
+    }
+    .card h2{margin:0 0 10px; font-size:18px; color:var(--coffee)}
+    .card p{margin:0 0 12px; color:var(--muted); font-weight:800; line-height:1.55}
+
+    .row{display:flex; gap:10px; align-items:center; flex-wrap:wrap}
+    .input, .select{
+      flex: 1 1 260px;
+      border-radius: 14px;
+      border:1px solid rgba(15,23,42,.14);
+      background: rgba(255,255,255,.78);
+      padding:12px 12px;
+      color:var(--ink);
+      font-weight:1000;
+      outline:none;
+    }
+    .input::placeholder{color: rgba(51,65,85,.7); font-weight:900}
+
+    .airportDecor{
+      display:flex; gap:10px; flex-wrap:wrap; align-items:center;
+      margin: 10px 0 12px; font-size: 22px;
+    }
+    .decorChip{
+      display:inline-flex; align-items:center; gap:8px;
+      padding:8px 12px; border-radius:999px;
+      border:1px solid rgba(15,23,42,.12);
+      background: rgba(255,255,255,.80);
+      box-shadow: 0 8px 18px rgba(2,6,23,.10);
+      font-weight:1000; color: var(--coffee); font-size: 14px;
+    }
+
+    .dialogue{display:flex; flex-direction:column; gap:12px}
+    .line{
+      border-radius: 18px; border:1px solid rgba(15,23,42,.12);
+      background: rgba(255,255,255,.72);
+      padding:12px; display:flex; align-items:flex-start; justify-content:space-between;
+      gap:12px; flex-wrap:wrap;
+    }
+    .line.locked{opacity:.55}
+    .left{display:flex; align-items:flex-start; gap:12px; flex: 1 1 520px; min-width: 260px;}
+    .actors{display:flex; gap:10px; align-items:center; flex-wrap:wrap}
+    .actorBtn{
+      border:0; cursor:pointer; border-radius: 16px;
+      padding:10px 12px; font-weight:1000;
+      background: rgba(255,255,255,.80);
+      border:1px solid rgba(15,23,42,.12);
+      box-shadow: 0 10px 22px rgba(2,6,23,.10);
+      color: var(--coffee);
+      display:flex; align-items:center; gap:10px;
+    }
+    .actorBtn:disabled{cursor:not-allowed; opacity:.6}
+    .avatar{
+      width:44px; height:44px; border-radius: 16px;
+      display:grid; place-items:center; font-size:24px;
+      background: rgba(251,191,36,.22); border:1px solid rgba(251,191,36,.40);
+    }
+    .avatar.cus{background: rgba(147,197,253,.25); border-color: rgba(147,197,253,.45);}
+    .aText{display:flex; flex-direction:column; gap:2px; line-height:1.2}
+    .aText .name{font-size:13px}
+    .aText .hint{font-size:11px; color: rgba(51,65,85,.75); font-weight:900}
+
+    .staffReveal{
+      margin-top:10px; width:100%;
+      border-radius: 14px;
+      border:1px dashed rgba(251,191,36,.55);
+      background: rgba(251,191,36,.14);
+      padding:10px 12px;
+      color: var(--coffee); font-weight:1000; line-height:1.35;
+    }
+    .staffReveal.hidden{
+      border-color: rgba(51,65,85,.18);
+      background: rgba(219,234,254,.25);
+      color: rgba(51,65,85,.85);
+    }
+
+    .answerSlot{
+      margin-top:10px; width:100%;
+      border-radius: 14px;
+      border:1px dashed rgba(14,165,233,.28);
+      background: rgba(147,197,253,.18);
+      padding:10px 12px;
+      color: var(--coffee); font-weight:1000; line-height:1.35;
+    }
+    .answerSlot.empty{
+      border-color: rgba(51,65,85,.20);
+      background: rgba(219,234,254,.22);
+      color: rgba(51,65,85,.85);
+    }
+
+    .status{display:flex; align-items:center; gap:10px; flex-wrap:wrap; justify-content:flex-end; min-width:220px;}
+    .badge{
+      display:inline-flex; gap:8px; align-items:center;
+      padding:7px 10px; border-radius:999px;
+      border:1px solid rgba(15,23,42,.10);
+      background: rgba(255,255,255,.75);
+      color: var(--mocha);
+      font-weight:1000; font-size:12px;
+    }
+    .badge.ok{border-color: rgba(14,165,233,.22); background: rgba(147,197,253,.22); color: var(--coffee);}
+    .badge.bad{border-color: rgba(251,113,133,.25); background: rgba(251,113,133,.12); color: #7a2235;}
+
+    .overlay{
+      position:fixed; inset:0; background: rgba(0,0,0,.45);
+      display:none; align-items:center; justify-content:center;
+      padding:16px; z-index:50;
+    }
+    .overlay.show{display:flex}
+    .modal{
+      width:min(760px, 100%);
+      border-radius: 24px;
+      border:1px solid rgba(15,23,42,.12);
+      background: rgba(255,255,255,.92);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+    }
+    .modalHeader{
+      padding:14px 16px;
+      display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap;
+      border-bottom:1px solid rgba(15,23,42,.10);
+      background: linear-gradient(90deg, rgba(255,255,255,.95), rgba(219,234,254,.70));
+    }
+    .modalHeader .mTitle{display:flex; align-items:center; gap:10px; font-weight:1000; color: var(--coffee);}
+    .modalHeader .mTitle i{
+      font-style:normal; width:38px; height:38px; border-radius: 14px;
+      display:grid; place-items:center;
+      border:1px solid rgba(14,165,233,.22);
+      background: rgba(147,197,253,.22);
+      color: var(--coffee);
+    }
+    .modalBody{padding:16px}
+    .qText{font-size:18px; font-weight:1000; margin:0 0 12px; color: var(--coffee);}
+    .subText{margin:0 0 10px; color: var(--muted); font-weight:900; font-size:13px; line-height:1.45;}
+    .options{display:grid; gap:10px; margin-top:10px}
+    .opt{
+      text-align:left; width:100%;
+      border-radius: 16px; padding:12px 12px;
+      border:1px solid rgba(15,23,42,.12);
+      background: rgba(255,255,255,.92);
+      color: var(--ink); font-weight:1000; cursor:pointer;
+    }
+    .opt.selected{border-color: rgba(251,191,36,.55); background: rgba(251,191,36,.18);}
+
+    .resultBox{margin-top:14px; display:none}
+    .resultBox.show{display:block}
+    .scoreBox{
+      display:flex; gap:12px; align-items:center; justify-content:space-between; flex-wrap:wrap;
+      border-radius: 18px;
+      border:1px solid rgba(14,165,233,.20);
+      background: rgba(147,197,253,.22);
+      padding:12px;
+      font-weight:1000;
+    }
+    .scoreBig{font-size:34px; color: var(--mint);}
+    .scoreMeta{color: var(--mocha); font-weight:1000; font-size:12px; line-height:1.35; max-width:520px;}
+
+    .toast{
+      position:fixed; left:50%; transform:translateX(-50%);
+      bottom:18px; z-index:80;
+      display:none;
+      padding:12px 14px; border-radius:16px;
+      border:1px solid rgba(15,23,42,.12);
+      background: rgba(255,255,255,.92);
+      box-shadow: var(--shadow);
+      font-weight:1000;
+      max-width:min(860px, 92vw);
+      color: var(--coffee);
+    }
+    .toast.show{display:block}
+    .toast.good{border-color: rgba(14,165,233,.28)}
+    .toast.bad{border-color: rgba(251,113,133,.30); color:#7a2235}
+  </style>
+</head>
+
+<body>
+  <div class="app">
+    <header>
+      <div class="brand">
+        <div class="pill">✈️ Kru Pai Classroom • Airport Listening Talk</div>
+        <div class="title">แก้แล้ว: Start เข้าหน้าเกมแน่นอน + สุ่มตำแหน่งคำตอบ + ฟังทั้งบท</div>
+        <div class="sub">คำตอบถูกไม่ใช่ A ตลอด • ตรวจแล้วกด “ฟังทั้งบทสนทนา” ได้</div>
+      </div>
+      <div class="hud">
+        <div class="chip">👤 <span id="hudName">Guest</span></div>
+        <div class="chip">✅ Done <strong id="hudProg">0</strong>/<span id="hudTotal">0</span></div>
+        <button class="btn secondary" id="btnSound" type="button">🔊 Sound</button>
+        <button class="btn danger" id="btnResetTop" type="button">↻ Reset</button>
+      </div>
+    </header>
+
+    <main>
+      <!-- START -->
+      <section class="screen active" id="screenStart">
+        <div class="grid">
+          <div class="card">
+            <h2>หน้าเริ่มเกม (สนามบิน)</h2>
+            <div class="airportDecor" aria-hidden="true">✈️ 🧳 🛂 🛃 🪪 🛫 🛬 💺 📢</div>
+            <div class="row" style="margin-bottom:10px;">
+              <span class="decorChip">🧑‍✈️ Staff</span>
+              <span class="decorChip">🙂 Traveler</span>
+              <span class="decorChip">🎧 Listening</span>
+              <span class="decorChip">🔀 Shuffle</span>
+            </div>
+
+            <p>
+              1) กดเจ้าหน้าที่ 🧑‍✈️ เพื่อฟัง (ยังไม่โชว์ข้อความ)<br>
+              2) กดผู้โดยสาร 🙂 เพื่อเลือกคำตอบที่ตรงความหมาย<br>
+              3) ตัวเลือกถูกสุ่มตำแหน่งทุกข้อ ✅<br>
+              4) ตรวจแล้วกด “ฟังทั้งบทสนทนา” ได้เลย 🎧
+            </p>
+
+            <div class="row">
+              <input class="input" id="nameInput" placeholder="พิมพ์ชื่อผู้เล่น (เช่น Pai)" maxlength="20" />
+              <button class="btn gold" id="btnStart" type="button">✨ Start</button>
+            </div>
+
+            <div style="height:10px"></div>
+            <h2 style="font-size:16px;margin:0 0 8px;">เลือกเสียง (Voice)</h2>
+            <div class="row">
+              <select class="select" id="voiceSelect"></select>
+              <button class="btn secondary" id="btnVoiceTest" type="button">🎙️ ทดสอบเสียง</button>
+            </div>
+            <p class="sub" id="voiceMsg" style="margin-top:10px;"></p>
+          </div>
+
+          <div class="card">
+            <h2>ช่วยเรื่องเสียง</h2>
+            <p>ถ้าเสียงอ่านไทยมาก ให้เลือกเสียงที่เป็น English (en-US/en-GB) ใน dropdown</p>
+            <div class="row">
+              <button class="btn secondary" id="btnHelp" type="button">💡 ถ้าเสียงไม่ออก</button>
+            </div>
+            <p class="sub" id="helpMsg" style="margin-top:10px;"></p>
+          </div>
+        </div>
+      </section>
+
+      <!-- GAME -->
+      <section class="screen" id="screenGame">
+        <div class="grid">
+          <div class="card">
+            <h2>บทสนทนา (ทำตามบรรทัดจากบนลงล่าง)</h2>
+            <p>กด 🧑‍✈️ เพื่อฟัง → กด 🙂 เพื่อเลือกคำตอบ</p>
+            <div class="dialogue" id="dialogue"></div>
+
+            <div style="height:12px"></div>
+            <div class="row">
+              <button class="btn gold" id="btnCheck" type="button">✅ ตรวจ</button>
+              <button class="btn secondary" id="btnTryAgain" type="button">🔄 ลองใหม่ (สุ่มใหม่)</button>
+            </div>
+          </div>
+
+          <div class="card">
+            <h2>ผลรวม + ฟังทั้งบท</h2>
+            <div class="resultBox" id="resultBox">
+              <div class="scoreBox">
+                <div>
+                  <div style="font-weight:1000; color:var(--coffee);">คะแนน</div>
+                  <div class="scoreBig" id="scorePercent">0%</div>
+                </div>
+                <div class="scoreMeta" id="scoreMeta"></div>
+              </div>
+              <div style="height:10px"></div>
+              <div class="row">
+                <button class="btn gold" id="btnPlayAll" type="button">🎧 ฟังทั้งบทสนทนา</button>
+                <button class="btn secondary" id="btnStopAll" type="button">⏹️ หยุดเสียง</button>
+              </div>
+            </div>
+            <p class="sub" id="resultHint">ยังไม่ได้ตรวจนะจ๊ะ 🙂 ทำให้ครบก่อนแล้วกด “ตรวจ”</p>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- MODAL -->
+  <div class="overlay" id="overlay" role="dialog" aria-modal="true">
+    <div class="modal">
+      <div class="modalHeader">
+        <div class="mTitle"><i>🙂</i> <span>Traveler Reply</span></div>
+        <button class="btn secondary" id="btnClose" type="button">✕</button>
+      </div>
+      <div class="modalBody">
+        <p class="qText">เลือกคำตอบของผู้โดยสาร</p>
+        <p class="subText" id="qSub"></p>
+        <div class="options" id="options"></div>
+        <div class="row" style="margin-top:12px; justify-content:flex-end;">
+          <button class="btn gold" id="btnConfirm" type="button">✅ ยืนยันคำตอบ</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+<script>
+(() => {
+  const $ = (id)=>document.getElementById(id);
+
+  const BASE_SCRIPT = [
+    { staffText:"Good morning! Where are you flying today?", prompt:"ฟังให้ดี แล้วตอบว่าไปที่ไหน",
+      options:["I'm flying to Singapore today.","I flew to Singapore yesterday.","This plane is yours."], correct:0 },
+    { staffText:"May I see your passport, please?", prompt:"ตอบให้เหมาะกับการขอพาสปอร์ต",
+      options:["Sure. Here it is.","I lost my passport tomorrow.","This passport is yours, not mine."], correct:0 },
+    { staffText:"Do you have any bags to check in?", prompt:"ตอบเรื่องกระเป๋าโหลดใต้เครื่อง",
+      options:["Yes, one suitcase.","Yes, I am bagging now.","No, my bag is very happy."], correct:0 },
+    { staffText:"Would you like a window seat or an aisle seat?", prompt:"เลือกที่นั่งให้ถูก (window/aisle)",
+      options:["A window seat, please.","I sat by the window yesterday.","Windows are expensive."], correct:0 },
+    { staffText:"Your gate is B12. Boarding starts at two thirty.", prompt:"ตอบรับข้อมูล Gate/เวลาให้เหมาะสม",
+      options:["Okay, thank you.","I will start boarding at two thirty yesterday.","This gate is delicious."], correct:0 },
+    { staffText:"Please take off your shoes and put your laptop in the tray.", prompt:"ตอบรับคำสั่งจุดตรวจ",
+      options:["Sure, I'll do it now.","Sure, I did it tomorrow.","My laptop is sleeping."], correct:0 },
+    { staffText:"Would you like some water before boarding?", prompt:"ตอบรับ/ปฏิเสธน้ำ",
+      options:["Yes, please.","No, water is your passport.","I am water yesterday."], correct:0 },
+    { staffText:"We are boarding now. May I see your boarding pass?", prompt:"ตอบให้เหมาะกับการขอดู boarding pass",
+      options:["Here it is.","I will see it yesterday.","This pass is for your dog."], correct:0 },
+    { staffText:"Have a pleasant flight!", prompt:"ตอบลา/ขอบคุณให้สุภาพ",
+      options:["Thank you! You too.","Thank you! I was pleasant yesterday.","My flight is at home."], correct:0 },
+    { staffText:"Welcome! Do you have anything to declare?", prompt:"ตอบเรื่องของต้องสำแดง",
+      options:["No, I don't.","Yes, I declare love.","No, I declared tomorrow."], correct:0 },
+  ];
+
+  let SCRIPT = [];
+  let state = {
+    player:"Guest",
+    mute:false,
+    listened:[],
+    chosen:[],
+    progress:0,
+    checked:false,
+    currentLine:null,
+    tempChoice:null,
+    voiceId:null,
+    playingAll:false
+  };
+
+  // elements
+  const screenStart = $("screenStart");
+  const screenGame  = $("screenGame");
+  const btnStart = $("btnStart");
+  const btnSound = $("btnSound");
+  const btnResetTop = $("btnResetTop");
+  const nameInput = $("nameInput");
+  const hudName = $("hudName");
+  const hudProg = $("hudProg");
+  const hudTotal = $("hudTotal");
+  const dialogue = $("dialogue");
+  const btnCheck = $("btnCheck");
+  const btnTryAgain = $("btnTryAgain");
+  const resultBox = $("resultBox");
+  const resultHint = $("resultHint");
+  const scorePercent = $("scorePercent");
+  const scoreMeta = $("scoreMeta");
+  const btnPlayAll = $("btnPlayAll");
+  const btnStopAll = $("btnStopAll");
+  const overlay = $("overlay");
+  const btnClose = $("btnClose");
+  const qSub = $("qSub");
+  const optionsEl = $("options");
+  const btnConfirm = $("btnConfirm");
+  const toast = $("toast");
+  const voiceSelect = $("voiceSelect");
+  const btnVoiceTest = $("btnVoiceTest");
+  const voiceMsg = $("voiceMsg");
+  const btnHelp = $("btnHelp");
+  const helpMsg = $("helpMsg");
+
+  function toastMsg(msg, good=true){
+    toast.className = "toast show " + (good ? "good":"bad");
+    toast.textContent = msg;
+    setTimeout(()=>toast.classList.remove("show"), 1600);
+  }
+
+  function showScreen(which){
+    screenStart.classList.remove("active");
+    screenGame.classList.remove("active");
+    which.classList.add("active");
+  }
+
+  function shuffleArray(arr){
+    const a = arr.slice();
+    for(let i=a.length-1;i>0;i--){
+      const j = Math.floor(Math.random()*(i+1));
+      [a[i],a[j]]=[a[j],a[i]];
+    }
+    return a;
+  }
+
+  function buildShuffledScript(){
+    SCRIPT = BASE_SCRIPT.map(item=>{
+      const paired = item.options.map((text, idx)=>({text, idx}));
+      const shuffled = shuffleArray(paired);
+      const optionsShuffled = shuffled.map(x=>x.text);
+      const correctShuffledIndex = shuffled.findIndex(x=>x.idx === item.correct);
+      return { staffText:item.staffText, prompt:item.prompt, options:optionsShuffled, correct:correctShuffledIndex };
+    });
+    state.listened = Array(SCRIPT.length).fill(false);
+    state.chosen = Array(SCRIPT.length).fill(null);
+    hudTotal.textContent = String(SCRIPT.length);
+  }
+
+  function updateHUD(){
+    hudName.textContent = state.player;
+    hudProg.textContent = String(state.progress);
+  }
+
+  function computeProgress(){
+    let c=0;
+    for(let i=0;i<SCRIPT.length;i++){
+      if(state.listened[i] && state.chosen[i]!==null) c++;
+    }
+    state.progress = c;
+    updateHUD();
+  }
+
+  // ===== TTS =====
+  function getVoicesSafe(){ try{ return speechSynthesis.getVoices?.() || []; }catch(e){ return []; } }
+
+  function populateVoices(){
+    if(!("speechSynthesis" in window)){
+      voiceSelect.innerHTML = `<option value="-1">ไม่รองรับเสียงพูด</option>`;
+      voiceSelect.disabled = true;
+      return;
+    }
+    const voices = getVoicesSafe();
+    const list = voices.length ? voices : [];
+    voiceSelect.innerHTML = "";
+    if(!list.length){
+      voiceSelect.innerHTML = `<option value="-1">กำลังโหลดเสียง…</option>`;
+      return;
+    }
+    // prefer EN voices at top
+    const sorted = list.slice().sort((a,b)=>{
+      const ae = (a.lang||"").toLowerCase().startsWith("en") ? 0 : 1;
+      const be = (b.lang||"").toLowerCase().startsWith("en") ? 0 : 1;
+      return ae - be;
+    });
+    sorted.forEach((v, idx)=>{
+      const opt = document.createElement("option");
+      opt.value = String(idx);
+      opt.textContent = `${v.name} — ${v.lang}`;
+      voiceSelect.appendChild(opt);
+    });
+    // pick first EN if exists
+    let pick = 0;
+    const enIdx = sorted.findIndex(v => (v.lang||"").toLowerCase().startsWith("en"));
+    if(enIdx>=0) pick = enIdx;
+    voiceSelect.value = String(state.voiceId ?? pick);
+    state.voiceId = Number(voiceSelect.value);
+  }
+
+  async function speakAsync(text){
+    if(state.mute) return;
+    if(!("speechSynthesis" in window)) return;
+    return new Promise(resolve=>{
+      try{
+        speechSynthesis.cancel();
+        const voices = getVoicesSafe();
+        const u = new SpeechSynthesisUtterance(text);
+        u.rate = 0.95; u.pitch = 1.05; u.volume = 1;
+        if(voices.length){
+          const v = voices[state.voiceId] || voices.find(x => (x.lang||"").toLowerCase().startsWith("en")) || voices[0];
+          u.voice = v;
+          u.lang = v.lang || "en-US";
+        }else{
+          u.lang = "en-US";
+        }
+        u.onend = ()=>resolve();
+        u.onerror = ()=>resolve();
+        speechSynthesis.speak(u);
+      }catch(e){ resolve(); }
+    });
+  }
+
+  function speak(text){
+    speakAsync(text); // fire and forget
+  }
+
+  function stopSpeech(){
+    try{ speechSynthesis.cancel(); }catch(e){}
+  }
+
+  // ===== Render dialogue =====
+  function renderDialogue(){
+    dialogue.innerHTML = "";
+    for(let i=0;i<SCRIPT.length;i++){
+      const isReady = (i===0) || (state.listened[i-1] && state.chosen[i-1]!==null);
+      const staffDisabled = !isReady;
+      const cusDisabled = !isReady || !state.listened[i];
+      const chosenIdx = state.chosen[i];
+      const chosenText = (chosenIdx===null) ? "" : SCRIPT[i].options[chosenIdx];
+
+      const staffShown = state.checked ? SCRIPT[i].staffText : "🕵️‍♀️ (ซ่อนประโยค) — กดตรวจเพื่อดู";
+      const staffClass = state.checked ? "" : "hidden";
+
+      let mark = "";
+      if(state.checked){
+        mark = (chosenIdx===SCRIPT[i].correct) ? `<span class="badge ok">✅ Correct</span>` : `<span class="badge bad">❌ Incorrect</span>`;
+      }
+
+      const line = document.createElement("div");
+      line.className = "line" + (!isReady ? " locked":"");
+      line.innerHTML = `
+        <div class="left">
+          <div style="width:100%;">
+            <div class="actors">
+              <button class="actorBtn" type="button" ${staffDisabled?"disabled":""} data-a="staff" data-i="${i}">
+                <span class="avatar">🧑‍✈️</span>
+                <span class="aText"><span class="name">เจ้าหน้าที่</span><span class="hint">กดเพื่อฟัง</span></span>
+              </button>
+              <button class="actorBtn" type="button" ${cusDisabled?"disabled":""} data-a="cus" data-i="${i}">
+                <span class="avatar cus">🙂</span>
+                <span class="aText"><span class="name">ผู้โดยสาร</span><span class="hint">เลือกคำตอบ</span></span>
+              </button>
+            </div>
+
+            <div class="staffReveal ${staffClass}">
+              <b>🧑‍✈️ Staff:</b> ${escapeHtml(staffShown)}
+            </div>
+
+            <div class="answerSlot ${chosenIdx===null ? "empty":""}">
+              ${chosenIdx===null ? "🙂 (ยังไม่ได้ตอบ)" : escapeHtml(chosenText)}
+            </div>
+          </div>
+        </div>
+
+        <div class="status"></div>
+      `;
+      dialogue.appendChild(line);
+    }
+
+    dialogue.querySelectorAll(".actorBtn").forEach(b=>{
+      b.addEventListener("click", ()=>{
+        const i = Number(b.dataset.i);
+        const a = b.dataset.a;
+        if(a==="staff"){ onStaff(i); }
+        if(a==="cus"){ onCustomer(i); }
+      });
+    });
+
+    computeProgress();
+  }
+
+  function escapeHtml(s){
+    return String(s).replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;");
+  }
+
+  function onStaff(i){
+    speak(SCRIPT[i].staffText);
+    state.listened[i] = true;
+    toastMsg("ฟังแล้ว! ต่อไปกดผู้โดยสาร 🙂", true);
+    renderDialogue();
+  }
+
+  function onCustomer(i){
+    state.currentLine = i;
+    state.tempChoice = state.chosen[i];
+    openModal(i);
+  }
+
+  function openModal(i){
+    overlay.classList.add("show");
+    qSub.textContent = SCRIPT[i].prompt;
+    optionsEl.innerHTML = "";
+    SCRIPT[i].options.forEach((t, idx)=>{
+      const btn = document.createElement("button");
+      btn.type="button";
+      btn.className = "opt" + (state.tempChoice===idx ? " selected":"");
+      btn.textContent = `${String.fromCharCode(65+idx)}. ${t}`;
+      btn.addEventListener("click", ()=>{
+        state.tempChoice = idx;
+        optionsEl.querySelectorAll(".opt").forEach(x=>x.classList.remove("selected"));
+        btn.classList.add("selected");
+      });
+      optionsEl.appendChild(btn);
+    });
+  }
+
+  function closeModal(){
+    overlay.classList.remove("show");
+    state.currentLine = null;
+    state.tempChoice = null;
+  }
+
+  btnClose.addEventListener("click", ()=>closeModal());
+  overlay.addEventListener("click", (e)=>{ if(e.target===overlay) closeModal(); });
+
+  btnConfirm.addEventListener("click", ()=>{
+    const i = state.currentLine;
+    if(i===null) return;
+    if(state.tempChoice===null){ toastMsg("เลือกคำตอบก่อนนะจ๊ะ 🙂", false); return; }
+    state.chosen[i] = state.tempChoice;
+    closeModal();
+    toastMsg("เลือกแล้ว ✅", true);
+    renderDialogue();
+  });
+
+  function canCheck(){
+    for(let i=0;i<SCRIPT.length;i++){
+      if(!(state.listened[i] && state.chosen[i]!==null)) return false;
+    }
+    return true;
+  }
+
+  function check(){
+    if(!canCheck()){ toastMsg("ทำให้ครบก่อนนะ (ฟัง + ตอบ)", false); return; }
+    let correct=0;
+    for(let i=0;i<SCRIPT.length;i++) if(state.chosen[i]===SCRIPT[i].correct) correct++;
+    const percent = Math.round(correct / SCRIPT.length * 100);
+    state.checked = true;
+
+    scorePercent.textContent = percent + "%";
+    scoreMeta.textContent = `ถูก ${correct}/${SCRIPT.length} บรรทัด • ตอนนี้ประโยคเจ้าหน้าที่โผล่ในบรรทัดแล้ว`;
+    resultBox.classList.add("show");
+    resultHint.textContent = "ตรวจแล้ว ✅ กดฟังทั้งบทสนทนาได้เลย";
+    renderDialogue();
+    toastMsg("ตรวจเสร็จแล้ว! 🎧", true);
+  }
+
+  async function playAllConversation(){
+    if(!state.checked){ toastMsg("ต้องกดตรวจก่อนนะจ๊ะ 🙂", false); return; }
+    if(state.playingAll) return;
+    state.playingAll = true;
+    stopSpeech();
+    for(let i=0;i<SCRIPT.length;i++){
+      if(!state.playingAll) break;
+      await speakAsync(SCRIPT[i].staffText);
+      if(!state.playingAll) break;
+      const c = SCRIPT[i].options[state.chosen[i]];
+      await speakAsync(c);
+    }
+    state.playingAll = false;
+    toastMsg("อ่านทั้งบทจบแล้ว ✅", true);
+  }
+
+  function stopAllConversation(){
+    state.playingAll = false;
+    stopSpeech();
+    toastMsg("หยุดเสียงแล้ว ⏹️", true);
+  }
+
+  function resetGame(){
+    stopAllConversation();
+    state.progress = 0;
+    state.checked = false;
+    resultBox.classList.remove("show");
+    resultHint.textContent = "ยังไม่ได้ตรวจนะจ๊ะ 🙂";
+    scorePercent.textContent = "0%";
+    scoreMeta.textContent = "";
+    buildShuffledScript();
+    renderDialogue();
+    updateHUD();
+  }
+
+  // buttons
+  btnStart.addEventListener("click", ()=>{
+    const nm = (nameInput.value||"").trim();
+    state.player = nm ? nm : "Guest";
+    updateHUD();
+    resetGame();
+    showScreen(screenGame);   // ✅ สำคัญ: ไปหน้าเกมแน่นอน
+    toastMsg("เริ่มได้เลย! กดเจ้าหน้าที่บรรทัดแรก 🧑‍✈️", true);
+  });
+
+  btnSound.addEventListener("click", ()=>{
+    state.mute = !state.mute;
+    btnSound.textContent = state.mute ? "🔇 Muted" : "🔊 Sound";
+    if(state.mute) stopAllConversation();
+  });
+
+  btnResetTop.addEventListener("click", ()=>{
+    showScreen(screenStart);
+    resetGame();
+  });
+
+  btnCheck.addEventListener("click", check);
+  btnTryAgain.addEventListener("click", resetGame);
+  btnPlayAll.addEventListener("click", playAllConversation);
+  btnStopAll.addEventListener("click", stopAllConversation);
+
+  btnVoiceTest.addEventListener("click", ()=>{
+    speak("Welcome to the airport. Please follow the instructions.");
+    voiceMsg.textContent = "ถ้าเสียงไทยมาก ให้เลือก voice ที่เป็น en-US / en-GB";
+  });
+
+  btnHelp.addEventListener("click", ()=>{
+    helpMsg.textContent = "ถ้าเสียงไม่ออก: เปิดเสียงเครื่อง • ใช้ Chrome • บางเครื่องต้องติดตั้ง English TTS ในตั้งค่าระบบ";
+  });
+
+  voiceSelect.addEventListener("change", ()=>{
+    state.voiceId = Number(voiceSelect.value);
+    voiceMsg.textContent = "เปลี่ยนเสียงแล้ว ✅";
+  });
+
+  // init
+  buildShuffledScript();
+  updateHUD();
+  renderDialogue();
+  populateVoices();
+  if("speechSynthesis" in window){
+    speechSynthesis.onvoiceschanged = populateVoices;
+    setTimeout(populateVoices, 700);
+  }
+})();
+</script>
+</body>
+</html>
